@@ -1,0 +1,84 @@
+[
+	{
+	  "ingredientPattern": "L_L,LPL,L_L",
+	  "width": 3,
+	  "height": 3,
+	  "ingredients": {
+		"L": {
+		  "type": "item",
+		  "code": "game:leather"
+		},
+		"P": { 
+		"type": "block",
+		"code": "books:papers-*",
+		"quantity" : 10
+		}
+	  },
+	  "output": {
+		"type": "block",
+		"code": "books:books-leather-north",
+		quantity: 1
+	  }
+	}
+	,
+	{
+	  "ingredientPattern": "L_L,LPL,LCL",
+	  "width": 3,
+	  "height": 3,
+	  "ingredients": {
+		"L": { "type": "item", "code": "game:leather"},
+		"P": {"type": "block","code": "books:papers-*",	"quantity" : 10},
+		"C": {"type": "item", "code": "game:ore-cinnabar"}
+	  },
+	  "output": {
+		"type": "block",
+		"code": "books:books-red-north",
+		quantity: 1
+	  }
+	},
+		{
+	  "ingredientPattern": "L_L,LPL,LCL",
+	  "width": 3,
+	  "height": 3,
+	  "ingredients": {
+		"L": { "type": "item", "code": "game:leather"},
+		"P": {"type": "block","code": "books:papers-*",	"quantity" : 10},
+		"C": {"type": "item", "code": "game:ore-lapislazuli"}
+	  },
+	  "output": {
+		"type": "block",
+		"code": "books:books-blue-north",
+		quantity: 1
+	  }
+	},
+		{
+	  "ingredientPattern": "L_L,LPL,LCL",
+	  "width": 3,
+	  "height": 3,
+	  "ingredients": {
+		"L": { "type": "item", "code": "game:leather"},
+		"P": {"type": "block","code": "books:papers-*",	"quantity" : 10},
+		"C": {"type": "item", "code": "game:crushed-olivine"}
+	  },
+	  "output": {
+		"type": "block",
+		"code": "books:books-green-north",
+		quantity: 1
+	  }
+	},
+			{
+	  "ingredientPattern": "L_L,LPL,LCL",
+	  "width": 3,
+	  "height": 3,
+	  "ingredients": {
+		"L": { "type": "item", "code": "game:leather"},
+		"P": {"type": "block","code": "books:papers-*",	"quantity" : 10},
+		"C": {"type": "block", "code": "books:inkwell-ink"}
+	  },
+	  "output": {
+		"type": "block",
+		"code": "books:books-black-north",
+		quantity: 1
+	  }
+	}
+]

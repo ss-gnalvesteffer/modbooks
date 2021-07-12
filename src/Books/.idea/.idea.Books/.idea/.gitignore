@@ -1,0 +1,13 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Rider ignored files
+/modules.xml
+/projectSettingsUpdater.xml
+/.idea.Books.iml
+/contentModel.xml
+# Datasource local storage ignored files
+/../../../../../../../../../:\_dev\_gavin\modbooks\src\Books\.idea\.idea.Books\.idea/dataSources/
+/dataSources.local.xml
+# Editor-based HTTP Client requests
+/httpRequests/

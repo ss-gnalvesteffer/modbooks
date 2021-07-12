@@ -1,0 +1,11 @@
+{
+  "type": "code",
+  "modid": "books",
+  "name": "Books, Paper and Ink",
+  "author": "Christoph Clouser (updated by Xorberax)",
+  "description": "Adds ink, paper, books, pen, quill and more to write with!",
+  "version": "1.0.1",
+  "dependency": {
+    "game": "1.15.0-rc.2"
+  }
+}
