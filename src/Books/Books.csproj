@@ -73,5 +73,8 @@
       Retries="3"
       RetryDelayMilliseconds="300"
     />
+    <ZipDirectory
+      SourceDirectory="$(OutDir)"
+      DestinationFile="$(OutDir)\..\Books.zip" />
   </Target>
 </Project>
