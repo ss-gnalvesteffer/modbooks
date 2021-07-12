@@ -75,6 +75,8 @@
     />
     <ZipDirectory
       SourceDirectory="$(OutDir)"
-      DestinationFile="$(OutDir)\..\Books.zip" />
+      DestinationFile="$(OutDir)\..\Books.zip"
+      Overwrite="true"
+    />
   </Target>
 </Project>
