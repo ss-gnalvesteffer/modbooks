@@ -308,7 +308,7 @@ namespace Books
                     Api.World,
                     _currentUserInfo.Player.Entity,
                     _currentUserInfo.EquippedItemSlot,
-                    Math.Max(currentBookTextLength - previousBookTextLength, 0)
+                    Math.Abs(currentBookTextLength - previousBookTextLength)
                 );
             }
         }
