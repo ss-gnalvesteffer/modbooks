@@ -1,15 +1,30 @@
 {
-	code: "itemquillink",
-	texture: { base: "item/books/itemquillink" },
-	creativeinventory: { "general": ["*"], "items": ["*"] },
-	maxstacksize: 64,
-	materialDensity: 140,
-	combustibleProps: {
-		burnTemperature: 400,
-		burnDuration: 3,
-	},
-	attributes: {
-			quillink: "true",
-			color: { red: 25, green: 24, blue: 22  },
-	}
+  "code": "itemquillink",
+  "texture": {
+    "base": "item/books/itemquillink"
+  },
+  "creativeinventory": {
+    "general": [
+      "*"
+    ],
+    "items": [
+      "*"
+    ]
+  },
+  "maxstacksize": 1,
+  "materialDensity": 140,
+  "durability": 500,
+  "combustibleProps": {
+    "burnTemperature": 400,
+    "burnDuration": 3
+  },
+  "attributes": {
+    "quillink": "true",
+    "writing_utensil": "true",
+    "color": {
+      "red": 25,
+      "green": 24,
+      "blue": 22
+    }
+  }
 }

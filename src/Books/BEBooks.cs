@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
@@ -13,50 +15,53 @@ namespace Books
 {
     public class BlockEntityBooks : BlockEntity
     {
+        private class UserInfo
+        {
+            public IPlayer Player { get; set; }
+            public ItemSlot EquippedItemSlot { get; set; }
+        }
+
         private static readonly int
             PageLimit = 20;
 
         private static readonly string
             // ID/dialog keys:
-            IDDialogBookEditor = "bookeditor";
+            IdDialogBookEditor = "bookeditor";
 
         private static readonly string
             // ID/dialog keys:
-            IDDialogBookReader = "bookreader";
-
-        private static readonly string
-            // ID/dialog keys:
-            // control falgs for read write gui
-            flag_R = "R";
+            IdDialogBookReader = "bookreader";
 
         private static readonly string
             // ID/dialog keys:
             // control falgs for read write gui
-            flag_W = "W";
+            FlagRead = "R";
+
+        private static readonly string
+            // ID/dialog keys:
+            // control falgs for read write gui
+            FlagWrite = "W";
 
         private static readonly string
             // ID/dialog keys:
             // control falgs for read write gui
             NetworkName = "BlockEntityTextInput";
 
-        public string[]
-            arText = new string[PageLimit],
-            arPageNames = new string[PageLimit];
+        public string[] PageTexts = new string[PageLimit];
 
-        private BooksAnimationHandler BookAnim;
+        public string[] ArPageNames = new string[PageLimit];
+
+        private BooksAnimationHandler _bookAnim;
         public ICoreClientAPI Capi;
 
-        public bool
-            isPaper,
-            Unique;
+        public bool IsPaper;
+        public bool Unique;
 
-        public int
-            // current page/pagemax <= pagelimit
-            PageMax = 1;
+        public int PageMax = 1; // current page/pagemax <= pagelimit
+
+        private UserInfo _currentUserInfo;
 
         public ICoreServerAPI Sapi;
-
-        public ItemStack tempStack;
 
         public string
             Title = "",
@@ -69,20 +74,20 @@ namespace Books
 
         public BlockEntityBooks(BlockPos blockPos, bool isPaper)
         {
-            this.isPaper = isPaper;
+            this.IsPaper = isPaper;
             DeletingText();
             Pos = blockPos;
         }
 
         public BlockEntityBooks(bool isUnique, bool isPaper, int pageMax, string title, string author, string[] text, BlockPos blockPos)
         {
-            this.isPaper = isPaper;
+            this.IsPaper = isPaper;
             Unique = isUnique;
             Pos = blockPos;
             PageMax = pageMax;
             Author = author;
             DeletingText();
-            arText = text;
+            PageTexts = text;
             Title = title;
         }
 
@@ -103,14 +108,14 @@ namespace Books
             // naming for saving in tree attributes, e.g. page1
             string
                 updatedPageName = "page",
-                temp_numbering = "";
+                tempNumbering = "";
 
             for (var i = 1; i <= PageLimit; i++)
             {
-                temp_numbering = i.ToString();
-                arPageNames[i - 1] = string.Concat(
+                tempNumbering = i.ToString();
+                ArPageNames[i - 1] = string.Concat(
                     updatedPageName,
-                    temp_numbering
+                    tempNumbering
                 );
             }
         }
@@ -119,16 +124,16 @@ namespace Books
         {
             for (var i = 0; i < PageLimit; i++)
             {
-                arText[i] = "";
+                PageTexts[i] = "";
             }
         }
 
 
         public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tessThreadTesselator)
         {
-            if (Api is ICoreClientAPI && !isPaper)
+            if (Api is ICoreClientAPI && !IsPaper)
             {
-                return BookAnim.HideDrawModel();
+                return _bookAnim.HideDrawModel();
             }
             return false;
         }
@@ -138,12 +143,12 @@ namespace Books
             base.Initialize(api);
             Api = api;
 
-            if (api is ICoreClientAPI && !isPaper)
+            if (api is ICoreClientAPI && !IsPaper)
             {
-                BookAnim = new BooksAnimationHandler(api as ICoreClientAPI, this);
+                _bookAnim = new BooksAnimationHandler(api as ICoreClientAPI, this);
             }
 
-            if (arPageNames == null)
+            if (ArPageNames == null)
             {
                 NamingPages();
             }
@@ -162,7 +167,7 @@ namespace Books
             Unique = tree.GetBool("unique");
             PageMax = tree.GetInt("PageMax", 1);
             Title = tree.GetString("title", "");
-            if (arPageNames[0] == null)
+            if (ArPageNames[0] == null)
             {
                 NamingPages();
             }
@@ -172,7 +177,7 @@ namespace Books
             }
             for (var i = 0; i < PageMax; i++)
             {
-                arText[i] = tree.GetString(arPageNames[i], "");
+                PageTexts[i] = tree.GetString(ArPageNames[i], "");
             }
         }
 
@@ -183,7 +188,7 @@ namespace Books
             tree.SetBool("unique", Unique);
             tree.SetInt("PageMax", PageMax);
             tree.SetString("title", Title);
-            if (arPageNames[0] == null)
+            if (ArPageNames[0] == null)
             {
                 NamingPages();
             }
@@ -195,16 +200,16 @@ namespace Books
             // only always load title and maxpage number info!
             for (var i = 0; i < PageMax; i++)
             {
-                tree.SetString(arPageNames[i], arText[i]);
+                tree.SetString(ArPageNames[i], PageTexts[i]);
             }
         }
 
         public override void OnBlockBroken()
         {
             // unregister renderer?
-            if (Api is ICoreClientAPI && !isPaper)
+            if (Api is ICoreClientAPI && !IsPaper)
             {
-                BookAnim.Dispose();
+                _bookAnim.Dispose();
             }
             // keep data
             // base.OnBlockBroken(); 
@@ -213,36 +218,38 @@ namespace Books
 
         public void OnRightClick(IPlayer byPlayer, bool isPaper)
         {
-            var controlRW = flag_R;
+            var controlRw = FlagRead;
 
             var hotbarSlot = byPlayer.InventoryManager.ActiveHotbarSlot;
 
             if (isPaper)
             {
-                this.isPaper = isPaper;
+                this.IsPaper = isPaper;
             }
 
-            if (arText[0] == null)
+            if (PageTexts[0] == null)
             {
                 DeletingText();
             }
 
-            if (byPlayer?.Entity?.Controls?.Sprint == true)
+            if (byPlayer.Entity?.Controls?.Sprint == true)
             {
                 if (Api is ICoreClientAPI && !isPaper)
                 {
-                    BookAnim.Close(Api);
+                    _bookAnim.Close(Api);
                 }
             }
 
-            if (byPlayer?.Entity?.Controls?.Sneak == true)
+            if (byPlayer.Entity?.Controls?.Sneak == true)
             {
-                if (hotbarSlot?.Itemstack?.ItemAttributes?["quillink"].Exists == true
-                    || hotbarSlot?.Itemstack?.ItemAttributes?["pen"].Exists == true)
+                if (DoesPlayerHaveWritingUtensilEquipped(byPlayer, out var writingUtensilSlot))
                 {
-                    tempStack = hotbarSlot.TakeOut(1);
-                    hotbarSlot.MarkDirty();
-                    controlRW = flag_W;
+                    _currentUserInfo = new UserInfo
+                    {
+                        Player = byPlayer,
+                        EquippedItemSlot = writingUtensilSlot,
+                    };
+                    controlRw = FlagWrite;
                 }
             }
 
@@ -256,10 +263,10 @@ namespace Books
                     writer.Write(PageMax);
                     for (var i = 0; i < PageMax; i++)
                     {
-                        writer.Write(arText[i]);
+                        writer.Write(PageTexts[i]);
                     }
                     writer.Write(Title);
-                    writer.Write(controlRW);
+                    writer.Write(controlRw);
                     writer.Write(Unique);
 
                     data = ms.ToArray();
@@ -279,27 +286,31 @@ namespace Books
             // TODO: populate BooksNetworkHandler:
             if (packetid == (int)EnumBookPacketId.SaveBook)
             {
+                var previousBookTextLength = PageTexts.Sum(pageText => pageText?.Length ?? 0);
                 using (var ms = new MemoryStream(data))
                 {
                     var reader = new BinaryReader(ms);
                     PageMax = reader.ReadInt32();
                     for (var i = 0; i < PageMax; i++)
                     {
-                        arText[i] = reader.ReadString();
+                        PageTexts[i] = reader.ReadString();
                     }
                     Title = reader.ReadString();
                     Unique = reader.ReadBoolean();
                 }
+                var currentBookTextLength = PageTexts.Sum(pageText => pageText?.Length ?? 0);
                 NamingPages();
                 MarkDirty(true);
                 Api.World.BlockAccessor.GetChunkAtBlockPos(Pos.X, Pos.Y, Pos.Z).MarkModified();
-            }
 
-            if (packetid == (int)EnumBookPacketId.CancelEdit && tempStack != null)
-            {
-                player.InventoryManager.TryGiveItemstack(tempStack);
+                // Reduce durability after writing in book.
+                _currentUserInfo.EquippedItemSlot.Itemstack.Collectible.DamageItem(
+                    Api.World,
+                    _currentUserInfo.Player.Entity,
+                    _currentUserInfo.EquippedItemSlot,
+                    Math.Max(currentBookTextLength - previousBookTextLength, 0)
+                );
             }
-            tempStack = null;
         }
 
         public override void OnReceivedServerPacket(int packetid, byte[] data)
@@ -315,24 +326,24 @@ namespace Books
                     PageMax = reader.ReadInt32();
                     for (var i = 0; i < PageMax; i++)
                     {
-                        arText[i] = reader.ReadString();
+                        PageTexts[i] = reader.ReadString();
                     }
                     Title = reader.ReadString();
-                    var controlRW = reader.ReadString();
+                    var controlRw = reader.ReadString();
                     var unique = reader.ReadBoolean();
 
                     var clientWorld = (IClientWorldAccessor)Api.World;
 
 
-                    if (controlRW.Equals(flag_W))
+                    if (controlRw.Equals(FlagWrite))
                     {
-                        var BGuiWrite = new BooksGui(isPaper, unique, Title, arText, PageMax, Api as ICoreClientAPI, IDDialogBookEditor);
-                        BGuiWrite.WriteGui(Pos, Api as ICoreClientAPI);
-                        BGuiWrite.OnCloseCancel = () =>
+                        var bGuiWrite = new BooksGui(IsPaper, unique, Title, PageTexts, PageMax, Api as ICoreClientAPI, IdDialogBookEditor);
+                        bGuiWrite.WriteGui(Pos, Api as ICoreClientAPI);
+                        bGuiWrite.OnCloseCancel = () =>
                         {
-                            if (Api is ICoreClientAPI && !isPaper)
+                            if (Api is ICoreClientAPI && !IsPaper)
                             {
-                                BookAnim.Close();
+                                _bookAnim.Close();
                             }
                             (Api as ICoreClientAPI)
                                 .Network
@@ -340,17 +351,17 @@ namespace Books
                                     Pos.X, Pos.Y, Pos.Z,
                                     (int)EnumBookPacketId.CancelEdit);
                         };
-                        BGuiWrite?.TryOpen();
+                        bGuiWrite?.TryOpen();
                     }
                     else
                     {
-                        var BGuiRead = new BooksGui(isPaper, unique, Title, arText, PageMax, Api as ICoreClientAPI, IDDialogBookReader);
-                        BGuiRead.ReadGui(Pos, Api as ICoreClientAPI);
-                        BGuiRead.OnCloseCancel = () =>
+                        var bGuiRead = new BooksGui(IsPaper, unique, Title, PageTexts, PageMax, Api as ICoreClientAPI, IdDialogBookReader);
+                        bGuiRead.ReadGui(Pos, Api as ICoreClientAPI);
+                        bGuiRead.OnCloseCancel = () =>
                         {
-                            if (Api is ICoreClientAPI && !isPaper)
+                            if (Api is ICoreClientAPI && !IsPaper)
                             {
-                                BookAnim.Close();
+                                _bookAnim.Close();
                             }
                             (Api as ICoreClientAPI)
                                 .Network
@@ -358,14 +369,20 @@ namespace Books
                                     Pos.X, Pos.Y, Pos.Z,
                                     (int)EnumBookPacketId.CancelEdit);
                         };
-                        BGuiRead?.TryOpen();
+                        bGuiRead?.TryOpen();
                     }
-                    if (Api is ICoreClientAPI && !isPaper)
+                    if (Api is ICoreClientAPI && !IsPaper)
                     {
-                        BookAnim.Open(Api);
+                        _bookAnim.Open(Api);
                     }
                 }
             }
+        }
+
+        private static bool DoesPlayerHaveWritingUtensilEquipped(IPlayer player, out ItemSlot writingUtensilSlot)
+        {
+            writingUtensilSlot = player.InventoryManager.ActiveHotbarSlot;
+            return writingUtensilSlot?.Itemstack?.ItemAttributes?["writing_utensil"].Exists == true;
         }
     }
 

@@ -117,7 +117,7 @@ namespace Books
                     BookTree.SetBool(saveIsUnique, BEBooks.Unique);
                     for (var i = 0; i < BEBooks.PageMax; i++)
                     {
-                        BookTree.SetString(BEBooks.arPageNames[i], BEBooks.arText[i]);
+                        BookTree.SetString(BEBooks.ArPageNames[i], BEBooks.PageTexts[i]);
                     }
                     UniqueBook.Attributes = BookTree;
                     UniqueBook.ResolveBlockOrItem(world);
@@ -150,7 +150,7 @@ namespace Books
                     BEBooks.NamingPages();
                     for (var i = 0; i < BEBooks.PageMax; i++)
                     {
-                        BEBooks.arText[i] = byItemStack.Attributes.GetString(BEBooks.arPageNames[i], "");
+                        BEBooks.PageTexts[i] = byItemStack.Attributes.GetString(BEBooks.ArPageNames[i], "");
                     }
                     world.BlockAccessor.MarkBlockDirty(blockPos);
                     world.BlockAccessor.MarkBlockEntityDirty(blockPos);
