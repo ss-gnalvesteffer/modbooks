@@ -362,6 +362,7 @@ namespace Books
                                     Pos.Z,
                                     (int)EnumBookPacketId.CancelEdit
                                 );
+                            _currentUserInfo = null;
                         };
                         bGuiWrite.TryOpen();
                     }
