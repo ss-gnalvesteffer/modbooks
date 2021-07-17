@@ -1,7 +1,7 @@
-# Writeable Books
-**Updated by Xorberax for Vintage Story 1.15.0**
+# Writeable Books | Durable Quills and Pencils
+**Updated by Xorberax for Vintage Story 1.15.1**
 
-Adds writeable books to Vintage Story.
+Adds writeable books to Vintage Story. This feature branch makes it so that quills and pencils have durability, and degrade during writing.
 
 See the wiki for more info about this mod: https://github.com/cloutech/modbooks/wiki
 
