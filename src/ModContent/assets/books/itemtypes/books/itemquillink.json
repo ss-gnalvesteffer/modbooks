@@ -13,7 +13,7 @@
   },
   "maxstacksize": 1,
   "materialDensity": 140,
-  "durability": 500,
+  "durability": 300,
   "combustibleProps": {
     "burnTemperature": 400,
     "burnDuration": 3

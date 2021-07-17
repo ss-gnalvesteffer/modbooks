@@ -19,6 +19,7 @@ namespace Books
         {
             public IPlayer Player { get; set; }
             public ItemSlot EquippedItemSlot { get; set; }
+            public int InitialWritingUtensilDurability { get; set; }
         }
 
         private static readonly int
@@ -248,6 +249,7 @@ namespace Books
                     {
                         Player = byPlayer,
                         EquippedItemSlot = writingUtensilSlot,
+                        InitialWritingUtensilDurability = writingUtensilSlot.Itemstack.Collectible.Durability,
                     };
                     controlRw = FlagWrite;
                 }
@@ -298,18 +300,9 @@ namespace Books
                     Title = reader.ReadString();
                     Unique = reader.ReadBoolean();
                 }
-                var currentBookTextLength = PageTexts.Sum(pageText => pageText?.Length ?? 0);
                 NamingPages();
                 MarkDirty(true);
                 Api.World.BlockAccessor.GetChunkAtBlockPos(Pos.X, Pos.Y, Pos.Z).MarkModified();
-
-                // Reduce durability after writing in book.
-                _currentUserInfo.EquippedItemSlot.Itemstack.Collectible.DamageItem(
-                    Api.World,
-                    _currentUserInfo.Player.Entity,
-                    _currentUserInfo.EquippedItemSlot,
-                    Math.Abs(currentBookTextLength - previousBookTextLength)
-                );
             }
         }
 
@@ -339,19 +332,38 @@ namespace Books
                     {
                         var bGuiWrite = new BooksGui(IsPaper, unique, Title, PageTexts, PageMax, Api as ICoreClientAPI, IdDialogBookEditor);
                         bGuiWrite.WriteGui(Pos, Api as ICoreClientAPI);
+                        bGuiWrite.OnTextChanged = (previousText, currentText) =>
+                        {
+                            var writingUtensil = _currentUserInfo.EquippedItemSlot?.Itemstack?.Collectible;
+                            if (writingUtensil == null)
+                            {
+                                bGuiWrite.TryClose();
+                            }
+                            else
+                            {
+                                _currentUserInfo.EquippedItemSlot.Itemstack.Collectible.DamageItem(
+                                    Api.World,
+                                    _currentUserInfo.Player.Entity,
+                                    _currentUserInfo.EquippedItemSlot,
+                                    Math.Abs(currentText.Length - previousText.Length)
+                                );
+                            }
+                        };
                         bGuiWrite.OnCloseCancel = () =>
                         {
                             if (Api is ICoreClientAPI && !IsPaper)
                             {
                                 _bookAnim.Close();
                             }
-                            (Api as ICoreClientAPI)
-                                .Network
+                            (Api as ICoreClientAPI)?.Network
                                 .SendBlockEntityPacket(
-                                    Pos.X, Pos.Y, Pos.Z,
-                                    (int)EnumBookPacketId.CancelEdit);
+                                    Pos.X,
+                                    Pos.Y,
+                                    Pos.Z,
+                                    (int)EnumBookPacketId.CancelEdit
+                                );
                         };
-                        bGuiWrite?.TryOpen();
+                        bGuiWrite.TryOpen();
                     }
                     else
                     {
@@ -369,7 +381,7 @@ namespace Books
                                     Pos.X, Pos.Y, Pos.Z,
                                     (int)EnumBookPacketId.CancelEdit);
                         };
-                        bGuiRead?.TryOpen();
+                        bGuiRead.TryOpen();
                     }
                     if (Api is ICoreClientAPI && !IsPaper)
                     {

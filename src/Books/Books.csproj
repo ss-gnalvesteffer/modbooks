@@ -35,11 +35,11 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="VintagestoryAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\..\..\..\Games\Vintagestory-1.15.0-rc3\VintagestoryAPI.dll</HintPath>
+      <HintPath>D:\Games\Vintagestory-1.15\VintagestoryAPI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VSEssentials, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\..\..\..\Games\Vintagestory-1.15.0-rc3\Mods\VSEssentials.dll</HintPath>
+      <HintPath>D:\Games\Vintagestory-1.15\Mods\VSEssentials.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

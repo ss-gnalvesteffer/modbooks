@@ -209,13 +209,18 @@ namespace Books
 
         public Action OnCloseCancel;
 
-        public Action<string> OnTextChanged;
+        public delegate void OnTextChangedHandler(string previousText, string currentText);
+        public OnTextChangedHandler OnTextChanged;
 
         private int
             PageCurrent;
 
         private string
-            Title = "",
+            Title = "";
+
+        private readonly string[] _previousText;
+
+        private string
             CurrentPageNumbering = "1/1",
             EditTitle = "",
             // button texts:
@@ -224,16 +229,7 @@ namespace Books
             _bClose = "",
             _bHelp = "";
 
-        public BooksGui(bool unique, string booktitle, string[] text, int pagemax, ICoreClientAPI capi, string dialogTitel) : base(dialogTitel, capi)
-        {
-            Capi = capi;
-            GetLangEntries();
-            PageMax = pagemax;
-            DeletingText();
-            text.CopyTo(Text, 0);
-            Title = booktitle;
-            Unique = unique;
-        }
+        private string _previousTitle;
 
         public BooksGui(bool isPaper, bool unique, string booktitle, string[] text, int pagemax, ICoreClientAPI capi, string dialogTitel) : base(dialogTitel, capi)
         {
@@ -242,19 +238,10 @@ namespace Books
             this.isPaper = isPaper;
             PageMax = pagemax;
             DeletingText();
+            _previousText = text;
             text.CopyTo(Text, 0);
+            _previousTitle = booktitle;
             Title = booktitle;
-            Unique = unique;
-        }
-
-        public BooksGui(bool unique, string booktitle, string[] text, int pagemax, BlockPos BlockEntityPosition, ICoreClientAPI capi, string dialogTitel) : base(dialogTitel, capi)
-        {
-            Capi = capi;
-            BEPos = BlockEntityPosition;
-            GetLangEntries();
-            Title = booktitle;
-            PageMax = pagemax;
-            text.CopyTo(Text, 0);
             Unique = unique;
         }
 
@@ -418,18 +405,17 @@ namespace Books
                 .AddDialogTitleBar(EditTitle, OnTitleBarClose)
                 .AddTextInput(
                     TitleAreaBounds,
-                    OnTitleAreaChanged,
+                    OnBookTextChanged,
                     CairoFont.TextInput().WithFontSize(TitleFont),
                     IDTitleInput)
                 .BeginChildElements(bgBounds)
                 .BeginClip(ClippingBounds)
                 .AddTextArea(
                     TextAreaBounds,
-                    OnTextAreaChanged,
+                    OnBookTextChanged,
                     CairoFont.TextInput().WithFontSize(TextFont),
                     IDTextArea)
                 .EndClip()
-                .AddSmallButton(Lang.Get(_bCancel), OnButtonCancel, CancelButtonBounds)
                 .AddSmallButton(Lang.Get(_bSave), OnButtonSave, SaveButtonBounds)
                 .AddSmallButton(Lang.Get(_bSub), OnButtonSub, SubPageButtonBounds)
                 .AddSmallButton(Lang.Get(_bAdd), OnButtonAdd, AddPageButtonBounds)
@@ -557,26 +543,19 @@ namespace Books
             }
         }
 
-        private void OnTitleAreaChanged(string value)
+        private void OnBookTextChanged(string value)
         {
             if (DialogTitle == DialogNameEditor)
             {
-                var TitleArea = Composers[CompNameEdit].GetTextInput(IDTitleInput);
-
-                OnTextChanged?.Invoke(TitleArea.GetText());
+                var titleArea = Composers[CompNameEdit].GetTextInput(IDTitleInput);
+                var titleText = titleArea.GetText();
+                var textArea = Composers[CompNameEdit].GetTextArea(IDTextArea);
+                Text[PageCurrent] = textArea.GetText();
+                OnTextChanged?.Invoke($"{_previousTitle} | {string.Join("\n", _previousText)}", $"{titleText} | {string.Join("\n", Text)}");
+                _previousTitle = titleText;
+                _previousText[PageCurrent] = Text[PageCurrent];
             }
         }
-
-        private void OnTextAreaChanged(string value)
-        {
-            if (DialogTitle == DialogNameEditor)
-            {
-                var TextArea = Composers[CompNameEdit].GetTextArea(IDTextArea);
-
-                OnTextChanged?.Invoke(TextArea.GetText());
-            }
-        }
-
 
         private void OnTitleBarClose()
         {
@@ -626,6 +605,7 @@ namespace Books
         {
             if (!didSave)
             {
+                OnButtonSave();
                 OnCloseCancel?.Invoke();
             }
             base.OnGuiClosed();
