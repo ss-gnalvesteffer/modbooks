@@ -4,8 +4,8 @@
 	  "width": 3,
 	  "height": 3,
 	  "ingredients": {
-		"C": { type: "item", code: "game:clay-*", quantity:2},
-		"K": { type: "item", code: "game:charcoal*", quantity:2},
+		"C": { type: "item", code: "game:clay-*", quantity:1},
+		"K": { type: "item", code: "game:charcoal*", quantity:1},
 		"W": { type: "item", code: "game:plank-*" },
 		"I": { type: "item", code: "game:chisel-*", isTool: true},
 		"H": { type: "item", code: "game:hammer-*", isTool: true}
@@ -13,7 +13,7 @@
 	  "output": {
 		"type": "item",
 		"code": "books:itempencil",
-		quantity: 4
+		quantity: 1
 	  }
 	},
 	{
@@ -30,7 +30,7 @@
 	  "output": {
 		"type": "item",
 		"code": "books:itempencil",
-		quantity: 8
+		quantity: 1
 	  }
 	}
 ]

@@ -1,0 +1,20 @@
+{
+  "code": "itempapers",
+  "texture": {
+    "base": "item/books/itempapers"
+  },
+  "creativeinventory": {
+    "general": [
+      "*"
+    ],
+    "items": [
+      "*"
+    ]
+  },
+  "maxstacksize": 64,
+  "materialDensity": 20,
+  "combustibleProps": {
+    "burnTemperature": 400,
+    "burnDuration": 2
+  }
+}

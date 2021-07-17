@@ -1,23 +1,22 @@
 {
-	"__comment": "working",
-  "ingredientPattern": "K	C",
+  "ingredientPattern": "KC",
   "width": 1,
   "height": 2,
   "ingredients": {
     "K": {
       "type": "item",
-      "code":  "game:knife-*",
-	  isTool: true 
+      "code": "game:knife-*",
+      "isTool": true
     },
-    "C": { 
-	"type": "item",
-	"code": "game:cattailtops",
-	quantity: 5
-	}
+    "C": {
+      "type": "item",
+      "code": "game:cattailtops",
+      "quantity": 5
+    }
   },
   "output": {
-    "type": "block",
-    "code": "books:papers-north",
-	quantity: 1
+    "type": "item",
+    "code": "books:itempapers",
+    "quantity": 1
   }
 }
