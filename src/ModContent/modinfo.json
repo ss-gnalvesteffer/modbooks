@@ -4,8 +4,8 @@
   "name": "Books, Paper and Ink",
   "author": "Xorberax (forked from Christoph Clouser/cloutech's modbooks)",
   "description": "Adds ink, paper, books, pen, quill and more to write with!",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "dependency": {
-    "game": "1.15.0-rc.2"
+    "game": "1.15.1"
   }
 }
